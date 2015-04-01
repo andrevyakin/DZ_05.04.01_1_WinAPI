@@ -49,11 +49,11 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 		MessageBox(NULL, L"Не получилось создать окно!", L"Ошибка", MB_OK);
 		return NULL;}
 
-		HWND button = CreateWindow(
+		HWND button1 = CreateWindow(
 					L"BUTTON", // Делаем кнопку //
 					L"Далее", // Это текст внутри кнопки //
 					WS_VISIBLE | WS_CHILD,
-					5, /* Положение и размеры кнопки*/
+					550, /* Положение и размеры кнопки*/
 					60,
 					105,
 					20,
@@ -61,6 +61,21 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 					(HMENU)100, /* обработка нажатия */
 					(HINSTANCE)GetWindowLong(hMainWnd, GWL_HINSTANCE),
 					NULL);
+
+		HWND button2 = CreateWindow(
+			L"BUTTON", // Делаем кнопку //
+			L"Выход", // Это текст внутри кнопки //
+			WS_VISIBLE | WS_CHILD,
+			750, /* Положение и размеры кнопки*/
+			60,
+			105,
+			20,
+			hMainWnd, /* родительское окно*/
+			(HMENU)100, /* обработка нажатия */
+			(HINSTANCE)GetWindowLong(hMainWnd, GWL_HINSTANCE),
+			NULL);
+		
+
 	
 	ShowWindow(hMainWnd, nCmdShow); // отображаем окошко
 	UpdateWindow(hMainWnd); // обновляем окошко
