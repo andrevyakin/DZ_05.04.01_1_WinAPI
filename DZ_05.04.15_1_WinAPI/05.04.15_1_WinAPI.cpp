@@ -2,7 +2,7 @@
 
 // Прототип функции обработки сообщений с пользовательским названием:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-TCHAR mainMessage[] = L"Какой то-текст!"; // строка с сообщением
+TCHAR mainMessage[] = L"Какой-то текст!"; // строка с сообщением
 
 // Управляющая функция:
 int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
@@ -47,8 +47,21 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 	if (!hMainWnd){
 		// в случае некорректного создания окошка (неверные параметры и тп):
 		MessageBox(NULL, L"Не получилось создать окно!", L"Ошибка", MB_OK);
-		return NULL;
-	}
+		return NULL;}
+
+		HWND button = CreateWindow(
+					L"BUTTON", // Делаем кнопку //
+					L"Далее", // Это текст внутри кнопки //
+					WS_VISIBLE | WS_CHILD,
+					5, /* Положение и размеры кнопки*/
+					60,
+					105,
+					20,
+					hMainWnd, /* родительское окно*/
+					(HMENU)100, /* обработка нажатия */
+					(HINSTANCE)GetWindowLong(hMainWnd, GWL_HINSTANCE),
+					NULL);
+	
 	ShowWindow(hMainWnd, nCmdShow); // отображаем окошко
 	UpdateWindow(hMainWnd); // обновляем окошко
 	while (GetMessage(&msg, NULL, NULL, NULL)){ // извлекаем сообщения из очереди, посылаемые фу-циями, ОС
@@ -57,6 +70,8 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 	}
 	return msg.wParam; // возвращаем код выхода из приложения
 }
+
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 	HDC hDC; // создаём дескриптор ориентации текста на экране
