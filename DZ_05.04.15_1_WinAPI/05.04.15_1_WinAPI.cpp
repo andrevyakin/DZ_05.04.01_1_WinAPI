@@ -1,8 +1,10 @@
 #include <windows.h> // заголовочный файл, содержащий WINAPI
+#include <conio.h>
 
 // Прототип функции обработки сообщений с пользовательским названием:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-TCHAR mainMessage[] = L"Какой-то текст!"; // строка с сообщением
+TCHAR mainMessage1[] = L"Какой-то текст!"; // строка с сообщением
+TCHAR mainMessage2[] = L"Какой-то ДРУГОЙ текст!"; // строка с сообщением
 
 // Управляющая функция:
 int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
@@ -34,7 +36,7 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 	// Функция, создающая окошко:
 	hMainWnd = CreateWindow(
 		szClassName, // имя класса
-		L"Полноценная оконная процедура", // имя окошка (то что сверху)
+		L"Моё убогое окошко", // имя окошка (то что сверху)
 		WS_OVERLAPPEDWINDOW | WS_VSCROLL, // режимы отображения окошка
 		CW_USEDEFAULT, // позиция окошка по оси х
 		NULL, // позиция окошка по оси у (раз дефолт в х, то писать не нужно)
@@ -47,26 +49,15 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 	if (!hMainWnd){
 		// в случае некорректного создания окошка (неверные параметры и тп):
 		MessageBox(NULL, L"Не получилось создать окно!", L"Ошибка", MB_OK);
-		return NULL;}
+		return NULL;
+	}
 
+	
 		HWND button1 = CreateWindow(
-					L"BUTTON", // Делаем кнопку //
-					L"Далее", // Это текст внутри кнопки //
-					WS_VISIBLE | WS_CHILD,
-					550, /* Положение и размеры кнопки*/
-					60,
-					105,
-					20,
-					hMainWnd, /* родительское окно*/
-					(HMENU)100, /* обработка нажатия */
-					(HINSTANCE)GetWindowLong(hMainWnd, GWL_HINSTANCE),
-					NULL);
-
-		HWND button2 = CreateWindow(
 			L"BUTTON", // Делаем кнопку //
-			L"Выход", // Это текст внутри кнопки //
+			L"Далее", // Это текст внутри кнопки //
 			WS_VISIBLE | WS_CHILD,
-			750, /* Положение и размеры кнопки*/
+			550, /* Положение и размеры кнопки*/
 			60,
 			105,
 			20,
@@ -76,7 +67,21 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 			NULL);
 		
 
-	
+	HWND button3 = CreateWindow(
+		L"BUTTON", // Делаем кнопку //
+		L"Выход", // Это текст внутри кнопки //
+		WS_VISIBLE | WS_CHILD,
+		750, /* Положение и размеры кнопки*/
+		60,
+		105,
+		20,
+		hMainWnd, /* родительское окно*/
+		(HMENU)300, /* обработка нажатия */
+		(HINSTANCE)GetWindowLong(hMainWnd, GWL_HINSTANCE),
+		NULL);
+
+
+
 	ShowWindow(hMainWnd, nCmdShow); // отображаем окошко
 	UpdateWindow(hMainWnd); // обновляем окошко
 	while (GetMessage(&msg, NULL, NULL, NULL)){ // извлекаем сообщения из очереди, посылаемые фу-циями, ОС
@@ -88,24 +93,72 @@ int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
 
 
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
 	HDC hDC; // создаём дескриптор ориентации текста на экране
 	PAINTSTRUCT ps; // структура, сод-щая информацию о клиентской области (размеры, цвет и тп)
 	RECT rect; // стр-ра, определяющая размер клиентской области
 	COLORREF colorText = RGB(255, 0, 0); // задаём цвет текста
-	switch (uMsg){
+	static bool flag1 = true, flag2 = true;
+	switch (uMsg)
+	{
 	case WM_PAINT: // если нужно нарисовать, то:
 		hDC = BeginPaint(hWnd, &ps); // инициализируем контекст устройства
 		GetClientRect(hWnd, &rect); // получаем ширину и высоту области для рисования
 		SetTextColor(hDC, colorText); // устанавливаем цвет контекстного устройства
-		DrawText(hDC, mainMessage, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER); // рисуем текст
+		if (flag1)
+		{
+			flag1 = false;
+			InvalidateRect(hWnd, &rect,0);
+		
+			DrawText(hDC, mainMessage1, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER); // рисуем текст
+			
+		}
+		else
+		{
+			flag1 = true;
+			InvalidateRect(hWnd, &rect, 0);
+			
+			DrawText(hDC, mainMessage2, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER); // рисуем ДРУГОЙ текст
+			
+		}
 		EndPaint(hWnd, &ps); // заканчиваем рисовать
+		_kbhit();
 		break;
+	case WM_COMMAND:
+	{
+					   
+					   switch (wParam)
+					   {
+
+					   case 100: // кнопка нажата
+						   if (flag2)
+						   {
+							   flag2 = false;
+							   SetWindowText((HWND)lParam, L"Назад");
+						   }
+						   else
+						   {
+							   flag2 = true;
+							   SetWindowText((HWND)lParam, L"Далее");
+						   }
+								   break;
+					 
+
+					   case 300 :
+
+						   PostQuitMessage(NULL); // отправляем WinMain() сообщение WM_QUIT
+						   break;
+
+					   }
+					   break;
+	}
+
 	case WM_DESTROY: // если окошко закрылось, то:
 		PostQuitMessage(NULL); // отправляем WinMain() сообщение WM_QUIT
 		break;
 	default:
-		return DefWindowProc(hWnd, uMsg, wParam, lParam); // если закрыли окошко
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	return NULL; // возвращаем значение
 }
