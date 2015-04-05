@@ -1,164 +1,182 @@
-#include <windows.h> // заголовочный файл, содержащий WINAPI
-#include <conio.h>
+#include<Windows.h>
+#include<tchar.h>
 
-// Прототип функции обработки сообщений с пользовательским названием:
+static TCHAR WindowsClass[] = L"win32app";
+static TCHAR Title[] = L"MyApp";
+HINSTANCE hinst;
+bool flag = true;
+
+#define ID_BUTTON1 1001
+#define ID_BUTTON2 1002
+#define ID_EDIT1 1004
+
+HWND button1, button2, edit1;
+
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-TCHAR mainMessage1[] = L"Какой-то текст!"; // строка с сообщением
-TCHAR mainMessage2[] = L"Какой-то ДРУГОЙ текст!"; // строка с сообщением
 
-// Управляющая функция:
-int WINAPI WinMain(HINSTANCE hInst, // дескриптор экземпляра приложения
-	HINSTANCE hPrevInst, // не используем
-	LPSTR lpCmdLine, // не используем
-	int nCmdShow) // режим отображения окошка
+int WINAPI WinMain(HINSTANCE hinstance,
+	HINSTANCE hPrevInstance,
+	LPSTR lpCmdLine,
+	int nCmdShow)
 {
-	TCHAR szClassName[] = L"Мой класс"; // строка с именем класса
-	HWND hMainWnd; // создаём дескриптор будущего окошка
-	MSG msg; // создём экземпляр структуры MSG для обработки сообщений
-	WNDCLASSEX wc; // создаём экземпляр, для обращения к членам класса WNDCLASSEX
-	wc.cbSize = sizeof(wc); // размер структуры (в байтах)
-	wc.style = CS_HREDRAW | CS_VREDRAW; // стиль класса окошка
-	wc.lpfnWndProc = WndProc; // указатель на пользовательскую функцию
-	wc.lpszMenuName = NULL; // указатель на имя меню (у нас его нет)
-	wc.lpszClassName = szClassName; // указатель на имя класса
-	wc.cbWndExtra = NULL; // число освобождаемых байтов в конце структуры
-	wc.cbClsExtra = NULL; // число освобождаемых байтов при создании экземпляра приложения
-	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO); // декриптор пиктограммы
-	wc.hIconSm = LoadIcon(NULL, IDI_WINLOGO); // дескриптор маленькой пиктограммы (в трэе)
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW); // дескриптор курсора
-	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); // дескриптор кисти для закраски фона окна
-	wc.hInstance = hInst; // указатель на строку, содержащую имя меню, применяемого для класса
-	if (!RegisterClassEx(&wc)){
-		// в случае отсутствия регистрации класса:
-		MessageBox(NULL, L"Не получилось зарегистрировать класс!", L"Ошибка", MB_OK);
-		return NULL; // возвращаем, следовательно, выходим из WinMain
-	}
-	// Функция, создающая окошко:
-	hMainWnd = CreateWindow(
-		szClassName, // имя класса
-		L"Моё убогое окошко", // имя окошка (то что сверху)
-		WS_OVERLAPPEDWINDOW | WS_VSCROLL, // режимы отображения окошка
-		CW_USEDEFAULT, // позиция окошка по оси х
-		NULL, // позиция окошка по оси у (раз дефолт в х, то писать не нужно)
-		CW_USEDEFAULT, // ширина окошка
-		NULL, // высота окошка (раз дефолт в ширине, то писать не нужно)
-		(HWND)NULL, // дескриптор родительского окна
-		NULL, // дескриптор меню
-		HINSTANCE(hInst), // дескриптор экземпляра приложения
-		NULL); // ничего не передаём из WndProc
-	if (!hMainWnd){
-		// в случае некорректного создания окошка (неверные параметры и тп):
-		MessageBox(NULL, L"Не получилось создать окно!", L"Ошибка", MB_OK);
-		return NULL;
+	WNDCLASSEX wcex;
+
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+	wcex.lpfnWndProc = WndProc;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hinstance;
+	wcex.hIcon = LoadIcon(hinstance, MAKEINTRESOURCE(IDI_APPLICATION));
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	/*wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);*/
+	wcex.hbrBackground = CreateSolidBrush(RGB(150, 70, 150));
+	wcex.lpszMenuName = NULL;
+	wcex.lpszClassName = WindowsClass;
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+
+	if (!RegisterClassEx(&wcex))
+	{
+		MessageBox(NULL, L"Call faild!", L"MyApp", NULL);
+		return 1;
 	}
 
-	
-		HWND button1 = CreateWindow(
-			L"BUTTON", // Делаем кнопку //
-			L"Далее", // Это текст внутри кнопки //
-			WS_VISIBLE | WS_CHILD,
-			550, /* Положение и размеры кнопки*/
-			60,
-			105,
-			20,
-			hMainWnd, /* родительское окно*/
-			(HMENU)100, /* обработка нажатия */
-			(HINSTANCE)GetWindowLong(hMainWnd, GWL_HINSTANCE),
-			NULL);
-		
+	hinst = hinstance;
 
-	HWND button3 = CreateWindow(
-		L"BUTTON", // Делаем кнопку //
-		L"Выход", // Это текст внутри кнопки //
-		WS_VISIBLE | WS_CHILD,
-		750, /* Положение и размеры кнопки*/
-		60,
-		105,
-		20,
-		hMainWnd, /* родительское окно*/
-		(HMENU)300, /* обработка нажатия */
-		(HINSTANCE)GetWindowLong(hMainWnd, GWL_HINSTANCE),
+	HWND hWnd = CreateWindow(
+		WindowsClass,
+		Title,
+		WS_OVERLAPPEDWINDOW,
+		100,
+		100,
+		800,
+		500,
+		NULL,
+		NULL,
+		hinst,
 		NULL);
 
-
-
-	ShowWindow(hMainWnd, nCmdShow); // отображаем окошко
-	UpdateWindow(hMainWnd); // обновляем окошко
-	while (GetMessage(&msg, NULL, NULL, NULL)){ // извлекаем сообщения из очереди, посылаемые фу-циями, ОС
-		TranslateMessage(&msg); // интерпретируем сообщения
-		DispatchMessage(&msg); // передаём сообщения обратно ОС
+	if (!hWnd)
+	{
+		MessageBox(NULL, L"Create window faild!", L"MyApp", NULL);
+		return 1;
 	}
-	return msg.wParam; // возвращаем код выхода из приложения
+	SetTimer(hWnd, 1, 100, NULL);
+	ShowWindow(hWnd, nCmdShow);
+
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return(int)msg.wParam;
 }
 
-
-
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	HDC hDC; // создаём дескриптор ориентации текста на экране
-	PAINTSTRUCT ps; // структура, сод-щая информацию о клиентской области (размеры, цвет и тп)
-	RECT rect; // стр-ра, определяющая размер клиентской области
-	COLORREF colorText = RGB(255, 0, 0); // задаём цвет текста
-	static bool flag1 = true, flag2 = true;
-	switch (uMsg)
+	PAINTSTRUCT ps;
+	HDC hdc;
+	RECT rect;
+	
+	TCHAR text1[] = L"Какой нибудь, неважно какой длинный текст";
+	TCHAR text2[] = L"Какой нибудь, ДРУГОЙ текст";
+	TCHAR text3[] = L"Далее";
+	TCHAR text4[] = L"Выход";
+	TCHAR text5[] = L"Назад";
+
+	switch (message)
 	{
-	case WM_PAINT: // если нужно нарисовать, то:
-		hDC = BeginPaint(hWnd, &ps); // инициализируем контекст устройства
-		GetClientRect(hWnd, &rect); // получаем ширину и высоту области для рисования
-		SetTextColor(hDC, colorText); // устанавливаем цвет контекстного устройства
-		if (flag1)
-		{
-			flag1 = false;
-			InvalidateRect(hWnd, &rect,0);
-		
-			DrawText(hDC, mainMessage1, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER); // рисуем текст
-			
-		}
-		else
-		{
-			flag1 = true;
-			InvalidateRect(hWnd, &rect, 0);
-			
-			DrawText(hDC, mainMessage2, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER); // рисуем ДРУГОЙ текст
-			
-		}
-		EndPaint(hWnd, &ps); // заканчиваем рисовать
-		_kbhit();
-		break;
+	
 	case WM_COMMAND:
-	{
-					   
-					   switch (wParam)
-					   {
 
-					   case 100: // кнопка нажата
-						   if (flag2)
-						   {
-							   flag2 = false;
-							   SetWindowText((HWND)lParam, L"Назад");
-						   }
-						   else
-						   {
-							   flag2 = true;
-							   SetWindowText((HWND)lParam, L"Далее");
-						   }
-								   break;
-					 
+	case BN_CLICKED:
 
-					   case 300 :
+		if (LOWORD(wParam) == ID_BUTTON1)
+		{
+			
+			if (flag)
 
-						   PostQuitMessage(NULL); // отправляем WinMain() сообщение WM_QUIT
-						   break;
+			{
+				flag = false;
+				SendMessage(button1, WM_SETTEXT, sizeof(text5), (LPARAM)text5);
+				SendMessage(edit1, WM_SETTEXT, (WPARAM)0, (LPARAM)text2);
+			}
+			else
+			{
+				flag = true;
+				SendMessage(button1, WM_SETTEXT, sizeof(text3), (LPARAM)text3);
+				SendMessage(edit1, WM_SETTEXT, (WPARAM)0, (LPARAM)text1);
+			}
+		}
+		
+		if (LOWORD(wParam) == ID_BUTTON2)
+			PostQuitMessage(NULL);
+		
+		break;
 
-					   }
-					   break;
-	}
+	case WM_CREATE:
 
-	case WM_DESTROY: // если окошко закрылось, то:
-		PostQuitMessage(NULL); // отправляем WinMain() сообщение WM_QUIT
+		GetClientRect(hWnd, &rect);
+				
+		edit1 = CreateWindowEx(
+			WS_EX_CLIENTEDGE,
+			L"edit",
+			text1,
+			WS_CHILD | WS_VISIBLE,
+			rect.right / 2 - ARRAYSIZE(text1) * 4.5,		/*координаты по X*/
+			(rect.bottom / 3),								/*координаты по Y*/
+			sizeof(text1)* sizeof(TCHAR) * 2,				/*Ширина окошка*/
+			20,
+			hWnd,
+			(HMENU)ID_EDIT1,
+			hinst,
+			NULL);
+
+		
+		button1 = CreateWindowEx(
+			WS_EX_CLIENTEDGE,
+			L"button",
+			text3,
+			WS_CHILD | WS_VISIBLE,
+			rect.right / 3 - ARRAYSIZE(text3) * 4,		/*координаты по X*/
+			(rect.bottom / 1.66),						/*координаты по Y*/
+			ARRAYSIZE(text3) * 10,						/*Ширина окошка*/
+			25,
+			hWnd,
+			(HMENU)ID_BUTTON1,
+			hinst,
+			NULL);
+
+		button2 = CreateWindowEx(
+			WS_EX_CLIENTEDGE,
+			L"button",
+			text4,
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			rect.right / 1.66 - ARRAYSIZE(text4) * 4,		/*координаты по X*/
+			(rect.bottom / 1.66),						/*координаты по Y*/
+			ARRAYSIZE(text4) * 10,						/*Ширина окошка*/
+			25,
+			hWnd,
+			(HMENU)ID_BUTTON2,
+			hinst,
+			NULL);
+		
+		break;
+	
+	case WM_PAINT:
+		
+		hdc = BeginPaint(hWnd, &ps);
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
 		break;
 	default:
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		return DefWindowProc(hWnd, message, wParam, lParam);
+		break;
 	}
-	return NULL; // возвращаем значение
+
+	return 0;
 }
